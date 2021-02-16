@@ -8,22 +8,44 @@ one and a half seconds, the content of the kernal rom is being switched.
 The code is written for an Arduino Pro Mini with an ATmega168
 microcontroller. It was the cheapest I could find.
 
-The GPIOs are set in four groups, each containing of one input and three
-outputs. If the input is low for more than one second, then the outputs
-will toggled. The starting value of all outputs upon power on is low.
-The groups are:
+The configuration is done at the start of the code. There are some
+common parameters and a small array. Basically you have a number of
+"groups" containing an input pin and a fixed number of output pins. The
+number of groups and the number of output pins per group are defined at
+the beginning of the code (NUM_GROUPS and NUM_OUTS). The checked in
+configuration is four groups with three output pins per group, so let's
+stick to this configuration.
 
-| input    | output 1 | output 2 | output 3 |
-| :------: | :------: | :------: | :------: |
-| 2        | 3        | 4        | 5        |
-| 9        | 8        | 7        | 6        |
-| 10       | 11       | 12       | 13       |
-| A3       | A2       | A1       | A0       |
+This is what the configuration looks like:
+```
+pin_group_t pin_group[NUM_GROUPS] = {
+   // intern   time     mode     in_pin  out_pins    line   intern
+   { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true,  false },
+   { MAX_TIME, 1500, MODE_TOGGLE,  10, {11, 12, 13}, true,  false },
+   { MAX_TIME, 1500, MODE_TRIGGER,  9, { 8,  7,  6}, true,  false },
+   { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true,  false }
+};
+```
+Let's walk through the parameters:
+* don't touch the first one noted "intern" with the value of "MAX_TIME"
+* the second defines the time on how long you have to hold an input to
+  trigger the action
+* mode defines the mode of operation: it can toggle from high to low
+  when you trigger it, and change back from low to high the next time;
+  it can also just trigger a change of the state for a short period of
+  time and then change it back.
+* the input pin defines the pin is waited on for a change, input is
+  always expected to change from high to low
+* the output pins are all changed together, so several functions can be
+  tied together
+* the line parameter states the default upon startup; for toggle mode
+  the last value can be read from the EEPROM, if configured
+* the final parameter is again used internally only
 
-(Keep in mind that the pin 13 is also connected to the LED, so pin 10
-also toggles the LED.)
+The time of the trigger event is specified in TRIGGER_TIME. There also
+is an option to trigger an event upon startup.
 
-The idea is taken from the [kernal switcher introduced by Adrians
+The idea is based upon the [kernal switcher introduced by Adrians
 Digital Basement](https://www.youtube.com/watch?v=GPq5xnJRw2w). The main
 changes are that switching will only happen between two states. Also,
 four inputs instead of one are supported, so you can toggle something
