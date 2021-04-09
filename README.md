@@ -21,8 +21,8 @@ This is what the configuration looks like:
 pin_group_t pin_group[NUM_GROUPS] = {
    // intern   time     mode     in_pin  out_pins    line   intern
    { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true,  false },
-   { MAX_TIME, 1500, MODE_TOGGLE,  10, {11, 12, 13}, true,  false },
-   { MAX_TIME, 1500, MODE_TRIGGER,  9, { 8,  7,  6}, true,  false },
+   { MAX_TIME, 1500, MODE_TRIGGER  10, {11, 12, 13}, true,  false },
+   { MAX_TIME, 1500, MODE_TOGGLE,   9, { 8,  7,  6}, true,  false },
    { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true,  false }
 };
 ```
@@ -37,7 +37,8 @@ Let's walk through the parameters:
 * the input pin defines the pin is waited on for a change, input is
   always expected to change from high to low
 * the output pins are all changed together, so several functions can be
-  tied together
+  tied together; if the output pin is a negative number (like -9 or -A3)
+  the output of that single pin is reversed
 * the line parameter states the default upon startup; for toggle mode
   the last value can be read from the EEPROM, if configured
 * the final parameter is again used internally only
@@ -51,3 +52,15 @@ changes are that switching will only happen between two states. Also,
 four inputs instead of one are supported, so you can toggle something
 on reset (like the kernal) and the restore key (like the SID) with the
 same microcontroller. 
+
+Flashing
+--------
+Here is what's working on my system. If you use this without verifying,
+you will most likely get and error message, something that will not work,
+or might even break the ATmega in the process.
+```
+avrdude -pm168p -cusbasp \
+   -U flash:w:tmp/LongPressSwitcher.hex:i \
+   -U lfuse:w:0xff:m -U hfuse:w:0xdf:m -U efuse:w:0xf8:m
+```
+

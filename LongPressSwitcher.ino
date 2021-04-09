@@ -26,7 +26,7 @@ typedef struct {
    uint16_t hold_time;           // config:   time needed to press for action
    uint8_t mode;                 // config:   what to do when triggered
    uint8_t in_pin;               // config:   pin to read
-   uint8_t out_pins[NUM_OUTS];   // config:   pins to write
+   int8_t out_pins[NUM_OUTS];    // config:   pins to write
    bool last_state;              // config:   state of untriggered output (trigger)
                                  // config:   the state upon startup without EEPROM (toggle)
    bool wait_release;            // internal: the action has been invoked, waiting for release
@@ -37,8 +37,8 @@ pin_group_t pin_group[NUM_GROUPS] = {
    // intern   time     mode     in_pin  out_pins    line   intern
    { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true,  false },
    // for Arduino Pro Micro change     {11, 12, 13} to {14, 15, 16}
-   { MAX_TIME, 1500, MODE_TOGGLE,  10, {11, 12, 13}, true,  false },
-   { MAX_TIME, 1500, MODE_TRIGGER,  9, { 8,  7,  6}, true,  false },
+   { MAX_TIME, 1500, MODE_TRIGGER, 10, {11, 12, 13}, true,  false },
+   { MAX_TIME, 1500, MODE_TOGGLE,   9, { 8,  7,  6}, true,  false },
    { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true,  false }
 };
 // to define less than max outputs, use same output pins a more than one time
@@ -125,7 +125,14 @@ void loop()
                case MODE_TOGGLE:
                   for( uint8_t o = 0; o < NUM_OUTS; ++o )
                   {
-                     digitalWrite( pin_group[g].out_pins[o], state ? HIGH : LOW );
+                     if( pin_group[g].out_pins[o] < 0 )
+                     {
+                        digitalWrite( -pin_group[g].out_pins[o], state ? LOW : HIGH );
+                     }
+                     else
+                     {
+                        digitalWrite( pin_group[g].out_pins[o], state ? HIGH : LOW );
+                     }
                   }
                   pin_group[g].last_state = state;
 #if USE_EEPROM
@@ -135,13 +142,27 @@ void loop()
                case MODE_TRIGGER:
                   for( uint8_t o = 0; o < NUM_OUTS; ++o )
                   {
-                     digitalWrite( pin_group[g].out_pins[o], state ? HIGH : LOW );
+                     if( pin_group[g].out_pins[o] < 0 )
+                     {
+                        digitalWrite( -pin_group[g].out_pins[o], state ? LOW : HIGH );
+                     }
+                     else
+                     {
+                        digitalWrite( pin_group[g].out_pins[o], state ? HIGH : LOW );
+                     }
                   }
                   delay( TRIGGER_TIME );
                   for( uint8_t o = 0; o < NUM_OUTS; ++o )
                   {
-                     // note: double reverse logic
-                     digitalWrite( pin_group[g].out_pins[o], state ? LOW : HIGH );
+                     if( pin_group[g].out_pins[o] < 0 )
+                     {
+                        digitalWrite( -pin_group[g].out_pins[o], state ? HIGH : LOW );
+                     }
+                     else
+                     {
+                        // note: double reverse logic
+                        digitalWrite( pin_group[g].out_pins[o], state ? LOW : HIGH );
+                     }
                   }
                   break;
                default:
