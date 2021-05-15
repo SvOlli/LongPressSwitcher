@@ -19,17 +19,18 @@ stick to this configuration.
 This is what the configuration looks like:
 ```
 pin_group_t pin_group[NUM_GROUPS] = {
-   // intern   time     mode     in_pin  out_pins    line   intern
-   { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true,  false },
-   { MAX_TIME, 1500, MODE_TRIGGER  10, {11, 12, 13}, true,  false },
-   { MAX_TIME, 1500, MODE_TOGGLE,   9, { 8,  7,  6}, true,  false },
-   { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true,  false }
+   // intern   time     mode     in_pin  out_pins    line    intern
+   { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true, STATE_RESET },
+   { MAX_TIME, 1500, MODE_TRIGGER  10, {11, 12, 13}, true, STATE_RESET },
+   { MAX_TIME, 1500, MODE_TOGGLE,   9, { 8,  7,  6}, true, STATE_RESET },
+   { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true, STATE_RESET }
 };
 ```
 Let's walk through the parameters:
 * don't touch the first one noted "intern" with the value of "MAX_TIME"
 * the second defines the time on how long you have to hold an input to
-  trigger the action
+  trigger the action; if the value is negative, then the time is
+  measured between the release and the next trigger (think double click)
 * mode defines the mode of operation: it can toggle from high to low
   when you trigger it, and change back from low to high the next time;
   it can also just trigger a change of the state for a short period of
@@ -41,7 +42,7 @@ Let's walk through the parameters:
   the output of that single pin is reversed
 * the line parameter states the default upon startup; for toggle mode
   the last value can be read from the EEPROM, if configured
-* the final parameter is again used internally only
+* the final parameter is again used only internally
 
 The time of the trigger event is specified in TRIGGER_TIME. There also
 is an option to trigger an event upon startup.
@@ -64,3 +65,7 @@ avrdude -pm168p -cusbasp \
    -U lfuse:w:0xff:m -U hfuse:w:0xdf:m -U efuse:w:0xf8:m
 ```
 
+Implementation Examples
+-----------------------
+Those and some information about the details are available in the
+document [SuccessStories.md](SuccessStories.md).
