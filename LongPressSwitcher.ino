@@ -61,6 +61,7 @@ void setup()
 {
 #if STARTUP_DONE_PIN >= 0
    uint8_t startup_done_pin_mode = 0xFF;
+   uint8_t startup_done_output_cache = 0xFF;
 #endif
    for( uint8_t g = 0; g < NUM_GROUPS; ++g )
    {
@@ -81,11 +82,19 @@ void setup()
       for( uint8_t o = 0; o < NUM_OUTS; ++o )
       {
          pinMode( pin_group[g].out_pins[o], OUTPUT );
-         digitalWrite( pin_group[g].out_pins[o], pin_group[g].last_state ? HIGH : LOW );
+         if( pin_group[g].out_pins[o] < 0 )
+         {
+            digitalWrite( -pin_group[g].out_pins[o], pin_group[g].last_state ? LOW : HIGH );
+         }
+         else
+         {
+            digitalWrite( pin_group[g].out_pins[o], pin_group[g].last_state ? HIGH : LOW );
+         }
 #if STARTUP_DONE_PIN >= 0
          if( STARTUP_DONE_PIN == pin_group[g].out_pins[o] )
          {
             startup_done_pin_mode = OUTPUT;
+            startup_done_output_cache = digitalRead( STARTUP_DONE_PIN );
          }
 #endif
       }
@@ -100,6 +109,11 @@ void setup()
    if( startup_done_pin_mode < 0xFF )
    {
       pinMode( STARTUP_DONE_PIN, startup_done_pin_mode );
+      if( startup_done_pin_mode == OUTPUT )
+      {
+         delay( TRIGGER_TIME );
+         digitalWrite( STARTUP_DONE_PIN, startup_done_output_cache );
+      }
    }
 #endif
 }
