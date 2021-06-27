@@ -6,6 +6,10 @@
 #
 
 BOARD_TAG          = pro
+ISP_PROG           = usbasp
+ISP_LOW_FUSE       = 0xff
+ISP_HIGH_FUSE      = 0xdf
+ISP_EXT_FUSE       = 0xd8
 MONITOR_PORT       = /dev/ttyUSB0
 MONITOR_BAUDRATE   = 115200
 BUILD_BASE        := $(abspath $(lastword $(MAKEFILE_LIST))/..)/tmp

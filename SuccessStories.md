@@ -33,10 +33,27 @@ configuration used is the same as for the C=128D, only that the SD2IEC
 line is unused.
 
 
-Amiga 2000 / CDTV
------------------
-You can get the reset signal from pin 5 of the 5719 Gary chip. This is not
-compatible with a long press. Only "double press" will work here.
+Amiga 2000
+----------
+You can get the reset signal from pin 5 of the 5719 Gary chip. The reset
+signal is as least 1.6 seconds long and will be expanded if the keys are held
+longer, so a time configuration of 2 seconds is more useful here. Also note
+that I configured the third output as -13, so the internal LED can be used
+to monitor the state as well. It is also negative, so pins A1 and 13 can be
+used to drive a dual color LED, e.g. as a replacement for the power LED.
+```
+pin_group_t pin_group[NUM_GROUPS] = {
+   // intern   time     mode     in_pin  out_pins    line    intern
+   // long press on reset changes kickstart 1.3 <-> 3.1
+   { MAX_TIME, 2000, MODE_TOGGLE,  A3, {A2, A1, -13}, true, STATE_RESET }
+```
+
+Amiga CDTV
+----------
+As with the Amiga 2000, you can get the reset signal from pin 5 of the
+5719 Gary chip. But this time it is not compatible with a long press, as
+the reset signal is will always be less than a second. Only "double press"
+will work here.
 
 The configuration used looks like this:
 ```
@@ -57,7 +74,6 @@ is not done too soon after the first one.
 
 Amiga 500
 ---------
-This works like the Amiga 2000. It should be also possible to try pin 3 of
-the keyboard connector, there the long press should be working, but that is
-as yet untested.
+This setup is as yet untested. This works like the Amiga 2000. It should be
+also possible to try pin 3 of the keyboard connector.
 
