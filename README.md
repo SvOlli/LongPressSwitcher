@@ -5,8 +5,19 @@ A simple Arduino project that intended to be used as a "hidden switch"
 for retro projects. For example pressing the reset button for more than
 one and a half seconds, the content of the kernal rom is being switched.
 
+The main features are:
+* highly configurable during compile time
+* number of switches only limited by number of pins
+* switch can be triggered by a long press or a "double click"
+* a single input can control multiple outputs
+* the output can be contigured to be low-active to high-active
+* the output can be contigured to be toggling or just trigger an impulse
+* state saved accross power cycles using the EEPROM (can be turned off)
+
 The code is written for an Arduino Pro Mini with an ATmega168
-microcontroller. It was the cheapest I could find.
+microcontroller. It was the cheapest I could find. It is also possible
+to use ATtiny25/45/85 or ATtiny24/44/84 microcontrollers, but they need
+some extra setup. This is described in detail in [ATtiny.md](ATtiny.md).
 
 The configuration is done at the start of the code. There are some
 common parameters and a small array. Basically you have a number of
