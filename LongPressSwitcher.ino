@@ -2,13 +2,28 @@
 // rather simple programmable switch
 // by SvOlli
 
-#define USE_EEPROM         (1)
-#define STARTUP_DONE_PIN   (A3)  // use -1 to turn feature off
-#define STARTUP_DONE_VALUE (LOW) // trigger HIGH or LOW on startup?
-#define TRIGGER_TIME       (50)  // ms
-#define DEBOUNCE_DELAY     (30)  // ms
+// use this to include a custom config using the IDE
+//#include "configs/attiny84.h"
 
+#ifndef USE_EEPROM
+#define USE_EEPROM         (1)
+#endif
+#ifndef STARTUP_DONE_PIN
+#define STARTUP_DONE_PIN   (A3)  // use -1 to turn feature off
+#endif
+#ifndef STARTUP_DONE_VALUE
+#define STARTUP_DONE_VALUE (LOW) // trigger HIGH or LOW on startup?
+#endif
+#ifndef TRIGGER_TIME
+#define TRIGGER_TIME       (50)  // ms
+#endif
+#ifndef DEBOUNCE_DELAY
+#define DEBOUNCE_DELAY     (30)  // ms
+#endif
+#ifndef NUM_OUTS
 #define NUM_OUTS           (3)
+#endif
+
 #define MAX_TIME           (0xFFFFFFFF)
 
 #if USE_EEPROM
@@ -20,8 +35,7 @@ typedef enum : uint8_t
    MODE_DISABLED = 0,
    MODE_TOGGLE,
    MODE_TRIGGER,
-}
-my_mode_t;
+} my_mode_t;
 
 typedef enum : uint8_t
 {
@@ -29,8 +43,7 @@ typedef enum : uint8_t
    STATE_WAIT_RELEASE = 1,
    STATE_FIRST_PRESS = 2,
    STATE_FIRST_RELEASE = 3
-}
-my_fsm_t;
+} my_fsm_t;
 
 typedef struct {
    uint32_t start_millis;        // internal: time stamp of press event
@@ -44,6 +57,9 @@ typedef struct {
 } pin_group_t;
 
 
+#ifdef PIN_SETUP
+pin_group_t pin_group[] = { PIN_SETUP };
+#else
 pin_group_t pin_group[] = {
    // intern   time  output mode  in_pin  out_pins   line   internal state
    { MAX_TIME, 1500, MODE_TOGGLE,  A3, {A2, A1, A0}, true,  STATE_RESET },
@@ -52,6 +68,7 @@ pin_group_t pin_group[] = {
    { MAX_TIME, 1500, MODE_TOGGLE,   9, { 8,  7,  6}, true,  STATE_RESET },
    { MAX_TIME, 1500, MODE_TRIGGER,  2, { 3,  4,  5}, true,  STATE_RESET }
 };
+#endif
 // to define less than max outputs, use same output pins a more than one time
 
 const uint8_t NUM_GROUPS = (sizeof(pin_group) / sizeof(pin_group[0]));
